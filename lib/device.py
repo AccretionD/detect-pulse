@@ -2,6 +2,7 @@ import cv2, time
 import urllib2, base64
 import numpy as np
 
+
 class ipCamera(object):
 
     def __init__(self,url, user = None, password = None):
@@ -16,7 +17,8 @@ class ipCamera(object):
         img_array = np.asarray(bytearray(response.read()), dtype=np.uint8)
         frame = cv2.imdecode(img_array, 1)
         return frame
-    
+
+
 class Camera(object):
 
     def __init__(self, camera = 0):
@@ -32,3 +34,19 @@ class Camera(object):
 
     def release(self):
         self.cam.release()
+
+
+class VideoStream(object):
+    def __init__(self,filename):
+        self.stream = cv2.VideoCapture(filename)
+        if not self.stream:
+            raise Exception("Unable to open filestream")
+
+        self.shape = self.get_frame().shape
+
+    def get_frame(self):
+        _,frame = self.stream.read()
+        return frame
+
+    def release(self):
+        self.stream.release()

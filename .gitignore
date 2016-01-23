@@ -1,5 +1,7 @@
 # IDE #
 #######
+.idea
+*.mp4
 *.wpr
 *.wpu
 
