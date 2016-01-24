@@ -1,3 +1,11 @@
+how to use in 2016
+-----------------------------------------
+- Requirements: 
+  - python2.7
+  - OpenMDAO has been rewritten, you have to go grab github.com/openmdao/openmdao-framework@0.9.8
+  - pip2 install traits
+
+
 ![Alt text](http://i.imgur.com/2ngZopS.jpg "Screenshot")
 
 webcam-pulse-detector
@@ -6,13 +14,13 @@ webcam-pulse-detector
 -------------------
 
 UPDATE: Stand-alone (no dependancy) precompiled application now available!
- - Download for Windows 7 and 8: [webcam-pulse-detector_win.zip](http://sourceforge.net/projects/webcampulsedetector/files/webcam-pulse-detector_win.zip/download) (42 Mb) 
- - Download for Mac OSX 10.6 (and later): [webcam-pulse-detector_mac.zip](http://sourceforge.net/projects/webcampulsedetector/files/webcam-pulse-detector_mac.zip/download) (21 Mb)
- - Debian/Ubuntu/Mint Linux: Coming very soon. For now, it is recommended that you run from source on the `no_openmdao` branch if you just want to test things out.
+- Download for Windows 7 and 8: [webcam-pulse-detector_win.zip](http://sourceforge.net/projects/webcampulsedetector/files/webcam-pulse-detector_win.zip/download) (42 Mb) 
+- Download for Mac OSX 10.6 (and later): [webcam-pulse-detector_mac.zip](http://sourceforge.net/projects/webcampulsedetector/files/webcam-pulse-detector_mac.zip/download) (21 Mb)
+- Debian/Ubuntu/Mint Linux: Coming very soon. For now, it is recommended that you run from source on the `no_openmdao` branch if you just want to test things out.
 
 The application can be run by simply executing the binary contained in the zip file for your platform.
 This code can also be run from source by [following the instructions below](#running-from-source).
- 
+
 -------------------
 
 A python code that detects the heart-rate of an individual using a common webcam or network IP camera. 
