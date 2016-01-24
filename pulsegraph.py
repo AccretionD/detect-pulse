@@ -122,37 +122,42 @@ class getPulseApp(object):
         Single iteration of the application's main loop.
         """
         # Get current image frame from the camera
-        frame = self.camera.get_frame()
-        if frame is not None:
+        try:
+            frame = self.camera.get_frame()
+            #  if frame is not None:
+                #  return False
+
+            self.h,self.w,_c = frame.shape
+            
+
+            #display unaltered frame
+            #imshow("Original",frame)
+
+            #set current image frame to the processor's input
+            self.processor.frame_in = frame
+            #process the image frame to perform all needed analysis
+            self.processor.run()
+            #collect the output frame for display
+            output_frame = self.processor.frame_out
+
+            #show the processed/annotated output frame
+            imshow("Processed",output_frame)
+
+            #create and/or update the raw data display if needed
+            if self.bpm_plot:
+                self.make_bpm_plot()
+
+            #handle any key presses
+            self.key_handler()
+        except TypeError:
             return False
-
-        self.h,self.w,_c = frame.shape
-        
-
-        #display unaltered frame
-        #imshow("Original",frame)
-
-        #set current image frame to the processor's input
-        self.processor.frame_in = frame
-        #process the image frame to perform all needed analysis
-        self.processor.run()
-        #collect the output frame for display
-        output_frame = self.processor.frame_out
-
-        #show the processed/annotated output frame
-        imshow("Processed",output_frame)
-
-        #create and/or update the raw data display if needed
-        if self.bpm_plot:
-            self.make_bpm_plot()
-
-        #handle any key presses
-        self.key_handler()
+        except AttributeArror:
+            return False
 
         return True
 
 if __name__ == "__main__":
     App = getPulseApp()
     while True:
-        if App.main_loop() is False:
+        if not App.main_loop():
             break
