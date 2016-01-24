@@ -106,6 +106,8 @@ class showBPMtext(Component):
         self.add("frame_out", Array(iotype="out"))
     
     def execute(self):
+        #if self.bpm:
+            #print("[!]BPM: %0.1f" % self.bpm)
         if self.ready:
             col = (0,255,0)
             text = "%0.1f bpm" % self.bpm
@@ -118,3 +120,5 @@ class showBPMtext(Component):
         cv2.putText(self.frame_in,text,
                     (self.x,self.y),cv2.FONT_HERSHEY_PLAIN,tsize,col)
         self.frame_out = self.frame_in
+
+        return self.bpm

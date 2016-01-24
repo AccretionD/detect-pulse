@@ -1,46 +1,49 @@
 from lib.device import VideoStream
 from lib.processors import findFaceGetPulse
 from lib.interface import plotXY, imshow, waitKey,destroyWindow, moveWindow
-import numpy as np      
+from pprint import pprint
+import numpy as np
 import datetime
+import sys
 
-class getPulseApp(object):
-    """
-    Python application that finds a face in a webcam stream, then isolates the
-    forehead.
+class Pulse(object):
 
-    Then the average green-light intensity in the forehead region is gathered 
-    over time, and the detected person's pulse is estimated.
-    """
-    def __init__(self):
-        #Imaging device - must be a connected camera (not an ip camera or mjpeg
-        #stream)
-        self.camera = VideoStream(filename="sample-hard.mp4") #first camera by default
-        self.w,self.h = 0,0
-        self.pressed = 0
+    def __init__(self,filename=(sys.argv[1] if len(sys.argv) > 1 else None)):
+        if (filename is None):
+            raise Exception("Filename unset")
+
+        self.camera = VideoStream(filename=filename) #first camera by default
+        #self.w,self.h = 0,0
+        #self.pressed = 0
+        self.bpms = []
+
         #Containerized analysis of recieved image frames (an openMDAO assembly)
         #is defined next.
 
         #This assembly is designed to handle all image & signal analysis,
         #such as face detection, forehead isolation, time series collection,
-        #heart-beat detection, etc. 
+        #heart-beat detection, etc.
 
         #Basically, everything that isn't communication
         #to the camera device or part of the GUI
         self.processor = findFaceGetPulse(bpm_limits = [50,160],
                                           data_spike_limit = 2500.,
-                                          face_detector_smoothness = 10.)  
+                                          face_detector_smoothness = 10.)
 
         #Init parameters for the cardiac data plot
-        self.bpm_plot = False
-        self.plot_title = "Cardiac info - raw signal, filtered signal, and PSD"
+        #self.bpm_plot = False
+        #self.plot_title = "Cardiac info - raw signal, filtered signal, and PSD"
 
         #Maps keystrokes to specified methods
         #(A GUI window must have focus for these to work)
-        self.key_controls = {"s" : self.toggle_search,
-                             "d" : self.toggle_display_plot,
-                             "f" : self.write_csv}
-        
+        #self.key_controls = {"s" : self.toggle_search,
+        #                     "d" : self.toggle_display_plot,
+        #                     "f" : self.write_csv}
+
+        while (self.main_loop()):
+            sys.stderr.write(". ")
+        sys.stderr.write("\n\n")
+
     def write_csv(self):
         """
         Writes current data to a csv file
@@ -51,8 +54,9 @@ class getPulseApp(object):
         data = np.array([self.processor.fft.times, 
                          self.processor.fft.samples]).T
         np.savetxt(fn, data, delimiter=',')
-        
 
+    def median(self):
+        return np.median(self.bpms)
 
     def toggle_search(self):
         """
@@ -84,19 +88,37 @@ class getPulseApp(object):
         """
         Creates and/or updates the data display
         """
-        plotXY([[self.processor.fft.times, 
+        plotXY(
+            [
+                [self.processor.fft.times,
                  self.processor.fft.samples],
                 [self.processor.fft.even_times[4:-4], 
                  self.processor.measure_heart.filtered[4:-4]],
                 [self.processor.measure_heart.freqs, 
-                 self.processor.measure_heart.fft]], 
+                 self.processor.measure_heart.fft]
+            ],
                labels = [False, False, True],
-               showmax = [False,False, "bpm"], 
+               showmax = [False,False, "bpm"],
+
                label_ndigits = [0,0,0],
                showmax_digits = [0,0,1],
+
                skip = [3,3,4],
                name = self.plot_title, 
-               bg = self.processor.grab_faces.slices[0])
+               bg = self.processor.grab_faces.slices[0]
+        )
+
+        return self.processor.measure_heart.bpm
+
+    def capture_bpms(self):
+        try:
+            if 300 > self.processor.measure_heart.bpm > 10:
+                self.bpms.append(self.processor.measure_heart.bpm)
+            else:
+                sys.stderr.write("D")
+        except NameError:
+            return
+
 
     def key_handler(self):    
         """
@@ -121,12 +143,19 @@ class getPulseApp(object):
         Single iteration of the application's main loop.
         """
         # Get current image frame from the camera
-        frame = self.camera.get_frame()
-        self.h,self.w,_c = frame.shape
+        try:
+            frame = self.camera.get_frame()
+            if ( frame is None ):
+                print ("EOF")
+                return False
+            self.h,self.w,_c = frame.shape
+        except AttributeError:
+            print ("ERR01 yo")
+            return False
         
 
         #display unaltered frame
-        #imshow("Original",frame)
+        imshow("Original",frame)
 
         #set current image frame to the processor's input
         self.processor.frame_in = frame
@@ -137,15 +166,18 @@ class getPulseApp(object):
 
         #show the processed/annotated output frame
         imshow("Processed",output_frame)
+        self.capture_bpms()
 
         #create and/or update the raw data display if needed
-        if self.bpm_plot:
-            self.make_bpm_plot()
+        #if self.bpm_plot:
+        #    testfk = self.make_bpm_plot()
+        #    print(testfk)
 
         #handle any key presses
-        self.key_handler()
+        #self.key_handler()
+        return True
 
 if __name__ == "__main__":
-    App = getPulseApp()
-    while True:
-        App.main_loop()
+    App = Pulse()
+    print App.median()
+

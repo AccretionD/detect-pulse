@@ -110,6 +110,7 @@ class findFaceGetPulse(Assembly):
         
         self.add("show_bpm_text", showBPMtext())
         self.driver.workflow.add("show_bpm_text")
+
         
         #-----------connections-----------
         # here is where we establish the relationships between the components 
