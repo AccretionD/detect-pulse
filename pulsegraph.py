@@ -1,3 +1,4 @@
+import os, sys
 from lib.device import *
 from lib.processors import findFaceGetPulse
 from lib.interface import plotXY, imshow, waitKey,destroyWindow, moveWindow
@@ -122,6 +123,9 @@ class getPulseApp(object):
         """
         # Get current image frame from the camera
         frame = self.camera.get_frame()
+        if frame is not None:
+            return False
+
         self.h,self.w,_c = frame.shape
         
 
@@ -145,7 +149,10 @@ class getPulseApp(object):
         #handle any key presses
         self.key_handler()
 
+        return True
+
 if __name__ == "__main__":
     App = getPulseApp()
     while True:
-        App.main_loop()
+        if App.main_loop() is False:
+            break
