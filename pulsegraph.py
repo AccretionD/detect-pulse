@@ -151,7 +151,7 @@ class getPulseApp(object):
             self.key_handler()
         except TypeError:
             return False
-        except AttributeArror:
+        except AttributeError:
             return False
 
         return True
